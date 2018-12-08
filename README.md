@@ -1,3 +1,4 @@
+
 @[TOC]
 
 # 使用场景
@@ -125,7 +126,13 @@ public final class AutoR {
 ```
 这是一个String类型的资源，系统编译的时候会自动确定他的常亮ID值，我们需要做的就是将这个ID值，替换为上一节中的`AutoR.getResId("status_string","string")`
 
-因此，我们的策略就是在系统prebuild task之前插入一个task，手动先调用Android sdk的aapt命令生产R.java,然后根据R.java生成AutoR.java即可。
+
+因此，我们的策略：
+
+ - 系统prebuild task之前插入一个task，手动先调用Android sdk的aapt命令生产R.java,然后根据R.java生成AutoR.java
+ - 同时将sdk源码中的import xx.R全部替换为import xx.AutoR
+ - 将所有调用资源的地方修改为`AutoR.string.xxxx`
+
 具体不多说，可以参考源码。
 
 源码地址[AutoR](https://github.com/TangHuaiZhe/AutoR)
