@@ -124,7 +124,7 @@ public final class AutoR {
     }
 。。。
 ```
-这是一个String类型的资源，系统编译的时候会自动确定他的常亮ID值，我们需要做的就是将这个ID值，替换为上一节中的`AutoR.getResId("status_string","string")`
+这是一个String类型的资源，系统编译的时候会自动确定他的常量ID值，我们需要做的就是将这个ID值，替换为上一节中的`AutoR.getResId("status_string","string")`
 
 
 因此，我们的策略：
@@ -132,6 +132,28 @@ public final class AutoR {
  - 系统prebuild task之前插入一个task，手动先调用Android sdk的aapt命令生产R.java,然后根据R.java生成AutoR.java
  - 同时将sdk源码中的import xx.R全部替换为import xx.AutoR
  - 将所有调用资源的地方修改为`AutoR.string.xxxx`
+
+```python
+//编译之前运行AutoR
+task autoR(type: Exec) {
+    println 'before preBuild'
+    commandLine 'python3','../autoR/autoR.py'
+}
+```
+
+最后生成的AutoR.java类似如下:
+```java
+...
+    public static final class anim {
+        public static int activity_close_enter = getResId("activity_close_enter", "anim");
+        public static int activity_close_exit = getResId("activity_close_exit", "anim");
+        public static int activity_in_right = getResId("activity_in_right", "anim");
+	......
+    public static final class attr {
+        public static int isLoop = getResId("isLoop", "attr");
+        public static int barContent = getResId("barContent", "attr");
+	......
+```
 
 具体不多说，可以参考源码。
 
