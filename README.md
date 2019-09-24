@@ -1,5 +1,9 @@
 
-@[TOC]
+[![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu)
+
+
+目前只支持MAC/Ubuntu，没有兼容windows
+
 
 # 使用场景
 一般而言是不需要手动生成R.java文件的，对app开发而言，无疑是画蛇添足，对sdk开发而言，因为Android提供了aar的依赖方式，可以将资源文件一起打包入aar，最后集成方一起编辑生成R.java即可。
