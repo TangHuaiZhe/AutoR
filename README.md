@@ -2,11 +2,45 @@
 [![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu)
 
 
-目前只支持MAC/Ubuntu，没有兼容windows
+## 使用指南
+0. 支持mac、linux、ubuntu环境,windows未支持,可以尝试debug修复,多数是路径等问题
+1. 把整个autoR文件夹复制到项目目录下
+2. 机器已经安装好python3.7环境
+3. 配置config.ini文件:
+```
+[Dir]
+ProjectOrResDir = SdpOpenWallet
+# android sdk目录,优先会查找ANDROID_HOME环境变量,没有再读取sdkdir目录
+sdkdir = /Users/tang/Library/Android/sdk
+
+[Version]
+# 编译sdk版本,用于生成R.java,最好和项目版本保持一致
+buildVersion = 27.0.3
+compileSdkVersion = 27
+
+[RClass]
+# 生成的AutoR.java文件所在包名
+RClassPackage = com.shengpay.tool
+# 是否需要替换代码
+ReplaceCode = true
+```
+4. Android App的gradle文件增加如下任务 
+```gradle
+//编译之前运行AutoR
+task autoR(type: Exec) {
+    println 'before preBuild'
+    commandLine 'python3','../autoR/autoR.py'
+}
+```
+5. 编译代码,`autoR`任务会运行
+6. `git status` 查看结果
+
+
+Todo: 使用gradle plugin实现.
 
 
 # 使用场景
-一般而言是不需要手动生成R.java文件的，对app开发而言，无疑是画蛇添足，对sdk开发而言，因为Android提供了aar的依赖方式，可以将资源文件一起打包入aar，最后集成方一起编辑生成R.java即可。
+一般而言是不需要手动生成R.java文件的，对app开发而言，无疑是画蛇添足，对sdk开发而言，因为Android提供了aar的依赖方式，可以将资源文件一起打包入aar，最后集成方一起编译生成R.java即可。
 然而，快要2019年了，仍然有一些强势的集成方/游戏开发商仍然在使用Eclipse开发，不支持aar的一来方式，要求SDK是jar包的形式。对于sdk包含UI的开发方而言是十分痛苦的。
 这种提供jar包+res的业务场景下就需要SDK开发者改变资源的获取方式，不能再通过原生`R.String.xxx`的方式获取资源，因为只有最后一次编译的时候才能确定资源的ID，之前的任何一次打包产生的ID值都是没有意义的。
 
@@ -14,6 +48,7 @@
 
  - 自动生成一个类似R.java一样的文件AutoR.java，包括所有的资源类型的引用，这个java文件最终一起打包进SDK的jar包。
  - 通过资源名和资源类型可以获取到宿主APP最终打包后的资源ID值
+ - 为方便重构/编码，仍然需要支持IDE的代码提示
 
 ## 通过资源名和资源类型获取ID
 
@@ -36,7 +71,7 @@
 除了Android系统自带的资源第一种反射的方式无法获取外，两者几乎是等价的，不存在某一种方式能获取到资源，另一种却获取不到的情况。
 
 性能方面：
-测试循环一万次，第一种反射的方式在我的2014年macbookpro上耗时157ms；
+测试循环一万次，第一种反射的方式在2014年macbookpro上耗时157ms；
 第二种方式耗时1900ms，而`R.string.xxx`的方式，循环1万次的耗时是0ms……
 
 因此显然，应该优先使用反射方式获取资源文件。
@@ -137,7 +172,7 @@ public final class AutoR {
  - 同时将sdk源码中的import xx.R全部替换为import xx.AutoR
  - 将所有调用资源的地方修改为`AutoR.string.xxxx`
 
-```python
+```gradle
 //编译之前运行AutoR
 task autoR(type: Exec) {
     println 'before preBuild'
@@ -160,5 +195,3 @@ task autoR(type: Exec) {
 ```
 
 具体不多说，可以参考源码。
-
-源码地址[AutoR](https://github.com/TangHuaiZhe/AutoR)
